@@ -48,7 +48,7 @@ router.post(
       });
     } catch (err) {
       console.error(err);
-      res.status(500).json({ message: err.message });
+      res.status(500).json({ message: 'Server error.' });
     }
   }
 );
@@ -87,7 +87,7 @@ router.post(
       });
     } catch (err) {
       console.error(err);
-      res.status(500).json({ message: err.message });
+      res.status(500).json({ message: 'Server error.' });
     }
   }
 );
