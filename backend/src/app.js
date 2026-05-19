@@ -15,8 +15,8 @@ const allowedOrigins = [
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
 
-app.use('/auth', authRoutes);
-app.use('/cvs', cvsRoutes);
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+app.use('/api/auth', authRoutes);
+app.use('/api/cvs', cvsRoutes);
+app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 
 module.exports = app;
