@@ -18,6 +18,8 @@ const templates: { id: TemplateType; en: string; es: string }[] = [
   { id: 'academic',  en: 'Academic',  es: 'Académico'  },
   { id: 'tech',      en: 'Tech',      es: 'Tech'       },
   { id: 'compact',   en: 'Compact',   es: 'Compacto'   },
+  { id: 'elegant',   en: 'Elegant',   es: 'Elegante'   },
+  { id: 'timeline',  en: 'Timeline',  es: 'Cronología' },
 ];
 
 const TemplateThumbnail = ({ id, selected }: { id: TemplateType; selected: boolean }) => {
@@ -129,6 +131,35 @@ const TemplateThumbnail = ({ id, selected }: { id: TemplateType; selected: boole
           <div className="h-0.5 bg-gray-200 rounded" />
           <div className="h-0.5 bg-gray-200 rounded w-3/4" />
           <div className="h-0.5 bg-gray-200 rounded w-1/2" />
+        </div>
+      );
+    case 'elegant':
+      return (
+        <div className="p-0.5 space-y-0.5">
+          <div className="h-0.5 w-full rounded-full mb-1" style={{ background: ac }} />
+          <div className="h-1 rounded-sm mx-auto w-3/4" style={{ background: dk }} />
+          <div className="flex justify-center gap-1 my-0.5">
+            <div className="h-px bg-gray-300 rounded flex-1" />
+            <div className="w-1 h-1 rounded-full flex-shrink-0 -mt-0.5" style={{ background: ac }} />
+            <div className="h-px bg-gray-300 rounded flex-1" />
+          </div>
+          <div className="h-0.5 bg-gray-200 rounded mx-auto w-2/3" />
+          <div className="h-0.5 rounded w-1/2 mx-auto" style={{ background: lg }} />
+        </div>
+      );
+    case 'timeline':
+      return (
+        <div className="flex h-full">
+          <div className="w-3.5 h-full px-0.5 flex flex-col gap-1 pt-1" style={{ background: ac }}>
+            <div className="w-2 h-2 rounded-full bg-white opacity-70 mx-auto" />
+            <div className="w-1 h-1 rounded-full bg-white opacity-50 mx-auto" />
+          </div>
+          <div className="flex-1 p-0.5 space-y-0.5">
+            <div className="h-0.5 bg-gray-200 rounded" />
+            <div className="h-0.5 bg-gray-200 rounded w-3/4" />
+            <div className="h-px rounded w-full" style={{ background: lg }} />
+            <div className="h-0.5 bg-gray-200 rounded w-2/3" />
+          </div>
         </div>
       );
     default:

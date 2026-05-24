@@ -1,4 +1,4 @@
-import type { AccentColor, FontFamily } from '../types/cv.types';
+import type { AccentColor, CVSettings, FontFamily } from '../types/cv.types';
 
 export const colorMap: Record<AccentColor, {
   bg: string;
@@ -28,6 +28,10 @@ export const fontFamilyMap: Record<FontFamily, string> = {
   roboto:      "'Roboto', system-ui, 'Helvetica Neue', sans-serif",
   merriweather:"'Merriweather', Georgia, 'Times New Roman', serif",
 };
+
+export function resolveAccentHex(settings: CVSettings): string {
+  return settings.customColor ?? colorMap[settings.accentColor]?.hex ?? '#2563eb';
+}
 
 export function formatDate(dateStr: string, language: 'en' | 'es' = 'en'): string {
   if (!dateStr) return '';

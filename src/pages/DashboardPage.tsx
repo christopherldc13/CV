@@ -77,8 +77,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ language, onEditCV
       const defaultSettings: CVSettings = {
         template: 'modern',
         accentColor: 'blue',
-        fontSize: 'normal',
+        fontSize: 'md',
         fontFamily: 'inter',
+        lineSpacing: 'normal',
+        photoShape: 'circle',
+        hiddenSections: [],
       };
       const res = await api.post('/cvs', {
         title: isEs ? 'Mi CV' : 'My CV',

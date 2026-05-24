@@ -13,7 +13,7 @@ export const ExecutiveTemplate: React.FC<Props> = ({ data, settings, language })
   const colors = colorMap[settings.accentColor];
   const font = fontFamilyMap[settings.fontFamily ?? 'georgia'];
   const { personalInfo: pi, summary, experience, education, skills, projects, certifications } = data;
-  const compact = settings.fontSize === 'compact';
+  const compact = (settings.fontSize as string) === 'compact';
   const isEs = language === 'es';
   const present = isEs ? 'Presente' : 'Present';
   const fmt = (d: string) => formatDate(d, language);

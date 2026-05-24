@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import type {
   CVData,
   CVSettings,
+  FontSize,
   PersonalInfo,
   WorkExperience,
   Education,
@@ -139,9 +140,23 @@ const defaultData: CVData = {
 const defaultSettings: CVSettings = {
   template: 'modern',
   accentColor: 'blue',
-  fontSize: 'normal',
+  fontSize: 'md',
   fontFamily: 'inter',
+  lineSpacing: 'normal',
+  photoShape: 'circle',
+  hiddenSections: [],
 };
+
+function normalizeSettings(raw: Partial<CVSettings>): CVSettings {
+  const merged = { ...defaultSettings, ...raw };
+  // backward compat: legacy fontSize values → new scale
+  const fs = merged.fontSize as string;
+  if (fs === 'normal') merged.fontSize = 'md';
+  else if (fs === 'compact') merged.fontSize = 'sm';
+  else if (!['xs', 'sm', 'md', 'lg'].includes(fs)) merged.fontSize = 'md' as FontSize;
+  if (!Array.isArray(merged.hiddenSections)) merged.hiddenSections = [];
+  return merged;
+}
 
 function normalizeCVData(raw: CVData): CVData {
   return {
@@ -169,7 +184,7 @@ export function useCVData(initialData?: { cvData?: CVData; settings?: CVSettings
     initialData?.cvData ? normalizeCVData(initialData.cvData) : defaultData
   );
   const [settings, setSettings] = useState<CVSettings>(
-    initialData?.settings ? { ...defaultSettings, ...initialData.settings } : defaultSettings
+    initialData?.settings ? normalizeSettings(initialData.settings) : defaultSettings
   );
 
   const updatePersonalInfo = useCallback((info: Partial<PersonalInfo>) => {

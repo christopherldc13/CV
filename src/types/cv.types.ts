@@ -73,19 +73,27 @@ export interface CVData {
 
 export type TemplateType =
   | 'classic' | 'modern' | 'minimal' | 'executive'
-  | 'creative' | 'tech' | 'compact' | 'bold' | 'academic';
+  | 'creative' | 'tech' | 'compact' | 'bold' | 'academic'
+  | 'elegant' | 'timeline';
 
 export type AccentColor =
   | 'blue' | 'emerald' | 'violet' | 'rose'
   | 'amber' | 'slate' | 'teal' | 'indigo' | 'orange' | 'dark';
 
 export type FontFamily = 'inter' | 'georgia' | 'playfair' | 'roboto' | 'merriweather';
+export type FontSize = 'xs' | 'sm' | 'md' | 'lg';
+export type LineSpacing = 'tight' | 'normal' | 'relaxed';
+export type PhotoShape = 'circle' | 'square' | 'hidden';
 
 export interface CVSettings {
   template: TemplateType;
   accentColor: AccentColor;
-  fontSize: 'normal' | 'compact';
+  customColor?: string;
+  fontSize: FontSize;
   fontFamily: FontFamily;
+  lineSpacing: LineSpacing;
+  photoShape: PhotoShape;
+  hiddenSections: string[];
 }
 
 export type FormSection =

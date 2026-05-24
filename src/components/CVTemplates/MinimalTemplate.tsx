@@ -13,7 +13,7 @@ export const MinimalTemplate: React.FC<Props> = ({ data, settings, language }) =
   const colors = colorMap[settings.accentColor];
   const font = fontFamilyMap[settings.fontFamily ?? 'inter'];
   const { personalInfo: pi, summary, experience, education, skills, projects, certifications } = data;
-  const compact = settings.fontSize === 'compact';
+  const compact = (settings.fontSize as string) === 'compact';
   const isEs = language === 'es';
 
   const present = isEs ? 'Presente' : 'Present';

@@ -1,9 +1,13 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Sidebar } from './components/Sidebar';
 import { TemplateSelector } from './components/TemplateSelector';
 import { ColorPicker } from './components/ColorPicker';
 import { FontPicker } from './components/FontPicker';
+import { FontSizeControl } from './components/FontSizeControl';
+import { SpacingControl } from './components/SpacingControl';
+import { SectionVisibility } from './components/SectionVisibility';
+import { PhotoShapeControl } from './components/PhotoShapeControl';
 import { ExportButton } from './components/ExportButton';
 import { PersonalInfoForm } from './components/CVForm/PersonalInfoForm';
 import { SummaryForm } from './components/CVForm/SummaryForm';
@@ -20,13 +24,19 @@ import { TechTemplate } from './components/CVTemplates/TechTemplate';
 import { CompactTemplate } from './components/CVTemplates/CompactTemplate';
 import { BoldTemplate } from './components/CVTemplates/BoldTemplate';
 import { AcademicTemplate } from './components/CVTemplates/AcademicTemplate';
+import { ElegantTemplate } from './components/CVTemplates/ElegantTemplate';
+import { TimelineTemplate } from './components/CVTemplates/TimelineTemplate';
 import { useCVData } from './hooks/useCVData';
 import { useLanguage } from './i18n/LanguageContext';
 import { useAuth } from './contexts/AuthContext';
 import { AuthPage } from './pages/AuthPage';
 import { DashboardPage } from './pages/DashboardPage';
 import api from './services/api';
-import type { FormSection, CVData, CVSettings } from './types/cv.types';
+import { colorMap } from './utils/colors';
+import type { FormSection, CVData, CVSettings, FontSize, LineSpacing } from './types/cv.types';
+
+const fontSizeZoom: Record<FontSize, number> = { xs: 0.78, sm: 0.88, md: 1, lg: 1.12 };
+const lineSpacingMap: Record<LineSpacing, string> = { tight: '1.3', normal: '1.55', relaxed: '1.75' };
 
 const SECTIONS: FormSection[] = [
   'personal',
@@ -138,9 +148,6 @@ function EditorView({
     sections: isEs ? 'Secciones' : 'Sections',
     sectionOf: isEs ? 'Sección' : 'Section',
     of: isEs ? 'de' : 'of',
-    size: isEs ? 'Tamaño' : 'Size',
-    normal: isEs ? 'Normal' : 'Normal',
-    compact: isEs ? 'Compacto' : 'Compact',
     previous: isEs ? 'Anterior' : 'Prev',
     next: isEs ? 'Siguiente' : 'Next',
     live: isEs ? 'En vivo' : 'Live',
@@ -215,8 +222,21 @@ function EditorView({
     }
   };
 
+  const visibleData = useMemo(() => {
+    const hs = settings.hiddenSections ?? [];
+    return {
+      ...cvData,
+      summary:        hs.includes('summary')        ? '' : cvData.summary,
+      experience:     hs.includes('experience')     ? [] : cvData.experience,
+      education:      hs.includes('education')      ? [] : cvData.education,
+      skills:         hs.includes('skills')         ? [] : cvData.skills,
+      projects:       hs.includes('projects')       ? [] : cvData.projects,
+      certifications: hs.includes('certifications') ? [] : cvData.certifications,
+    };
+  }, [cvData, settings.hiddenSections]);
+
   const renderTemplate = () => {
-    const props = { data: cvData, settings, language };
+    const props = { data: visibleData, settings, language };
     switch (settings.template) {
       case 'classic':   return <ClassicTemplate {...props} />;
       case 'modern':    return <ModernTemplate {...props} />;
@@ -227,6 +247,8 @@ function EditorView({
       case 'compact':   return <CompactTemplate {...props} />;
       case 'bold':      return <BoldTemplate {...props} />;
       case 'academic':  return <AcademicTemplate {...props} />;
+      case 'elegant':   return <ElegantTemplate {...props} />;
+      case 'timeline':  return <TimelineTemplate {...props} />;
       default:          return <ModernTemplate {...props} />;
     }
   };
@@ -313,29 +335,6 @@ function EditorView({
               }`}
             >
               ES
-            </button>
-          </div>
-        </div>
-
-        {/* Size toggle — hidden on mobile */}
-        <div className="hidden md:flex items-center gap-2 ml-2">
-          <span className="text-xs text-gray-400">{ui.size}:</span>
-          <div className="flex rounded-lg border border-gray-200 overflow-hidden">
-            <button
-              onClick={() => updateSettings({ fontSize: 'normal' })}
-              className={`px-3 py-1.5 text-xs font-medium transition ${
-                settings.fontSize === 'normal' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              {ui.normal}
-            </button>
-            <button
-              onClick={() => updateSettings({ fontSize: 'compact' })}
-              className={`px-3 py-1.5 text-xs font-medium transition ${
-                settings.fontSize === 'compact' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              {ui.compact}
             </button>
           </div>
         </div>
@@ -459,12 +458,34 @@ function EditorView({
                 />
                 <ColorPicker
                   selected={settings.accentColor}
-                  onChange={(c) => updateSettings({ accentColor: c })}
+                  onChange={(c) => updateSettings({ accentColor: c, customColor: undefined })}
+                  customColor={settings.customColor}
+                  onCustomColor={(hex) => updateSettings({ customColor: hex })}
                   language={language}
                 />
                 <FontPicker
                   selected={settings.fontFamily ?? 'inter'}
                   onChange={(f) => updateSettings({ fontFamily: f })}
+                  language={language}
+                />
+                <FontSizeControl
+                  selected={settings.fontSize ?? 'md'}
+                  onChange={(s) => updateSettings({ fontSize: s })}
+                  language={language}
+                />
+                <SpacingControl
+                  selected={settings.lineSpacing ?? 'normal'}
+                  onChange={(s) => updateSettings({ lineSpacing: s })}
+                  language={language}
+                />
+                <PhotoShapeControl
+                  selected={settings.photoShape ?? 'circle'}
+                  onChange={(s) => updateSettings({ photoShape: s })}
+                  language={language}
+                />
+                <SectionVisibility
+                  hidden={settings.hiddenSections ?? []}
+                  onChange={(h) => updateSettings({ hiddenSections: h })}
                   language={language}
                 />
                 <ExportButton onExportJSON={exportJSON} onImportJSON={importJSON} language={language} />
@@ -549,7 +570,10 @@ function EditorView({
                   width: '794px',
                   minHeight: '1123px',
                   boxShadow: '0 20px 60px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.08)',
-                }}
+                  zoom: fontSizeZoom[settings.fontSize ?? 'md'],
+                  lineHeight: lineSpacingMap[settings.lineSpacing ?? 'normal'],
+                  '--cv-accent': settings.customColor ?? colorMap[settings.accentColor]?.hex ?? '#2563eb',
+                } as React.CSSProperties}
               >
                 <ErrorBoundary>{renderTemplate()}</ErrorBoundary>
               </div>
@@ -578,28 +602,6 @@ function EditorView({
               </button>
             </div>
             <div className="overflow-y-auto flex-1 p-5 space-y-4">
-              {/* Size toggle */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500 font-medium">{ui.size}:</span>
-                <div className="flex rounded-lg border border-gray-200 overflow-hidden">
-                  <button
-                    onClick={() => updateSettings({ fontSize: 'normal' })}
-                    className={`px-3 py-1.5 text-xs font-medium transition ${
-                      settings.fontSize === 'normal' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-50'
-                    }`}
-                  >
-                    {ui.normal}
-                  </button>
-                  <button
-                    onClick={() => updateSettings({ fontSize: 'compact' })}
-                    className={`px-3 py-1.5 text-xs font-medium transition ${
-                      settings.fontSize === 'compact' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-50'
-                    }`}
-                  >
-                    {ui.compact}
-                  </button>
-                </div>
-              </div>
               <TemplateSelector
                 selected={settings.template}
                 onChange={(t) => updateSettings({ template: t })}
@@ -607,12 +609,34 @@ function EditorView({
               />
               <ColorPicker
                 selected={settings.accentColor}
-                onChange={(c) => updateSettings({ accentColor: c })}
+                onChange={(c) => updateSettings({ accentColor: c, customColor: undefined })}
+                customColor={settings.customColor}
+                onCustomColor={(hex) => updateSettings({ customColor: hex })}
                 language={language}
               />
               <FontPicker
                 selected={settings.fontFamily ?? 'inter'}
                 onChange={(f) => updateSettings({ fontFamily: f })}
+                language={language}
+              />
+              <FontSizeControl
+                selected={settings.fontSize ?? 'md'}
+                onChange={(s) => updateSettings({ fontSize: s })}
+                language={language}
+              />
+              <SpacingControl
+                selected={settings.lineSpacing ?? 'normal'}
+                onChange={(s) => updateSettings({ lineSpacing: s })}
+                language={language}
+              />
+              <PhotoShapeControl
+                selected={settings.photoShape ?? 'circle'}
+                onChange={(s) => updateSettings({ photoShape: s })}
+                language={language}
+              />
+              <SectionVisibility
+                hidden={settings.hiddenSections ?? []}
+                onChange={(h) => updateSettings({ hiddenSections: h })}
                 language={language}
               />
               <ExportButton onExportJSON={exportJSON} onImportJSON={importJSON} language={language} />
