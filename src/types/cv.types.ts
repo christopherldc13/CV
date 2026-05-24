@@ -84,6 +84,7 @@ export type FontFamily = 'inter' | 'georgia' | 'playfair' | 'roboto' | 'merriwea
 export type FontSize = 'xs' | 'sm' | 'md' | 'lg';
 export type LineSpacing = 'tight' | 'normal' | 'relaxed';
 export type PhotoShape = 'circle' | 'square' | 'hidden';
+export type CVMargins = 'tight' | 'normal' | 'wide';
 
 export interface CVSettings {
   template: TemplateType;
@@ -93,6 +94,7 @@ export interface CVSettings {
   fontFamily: FontFamily;
   lineSpacing: LineSpacing;
   photoShape: PhotoShape;
+  margins: CVMargins;
   hiddenSections: string[];
 }
 

@@ -1,12 +1,12 @@
 import React from 'react';
 import type { CVData, CVSettings } from '../../types/cv.types';
 import type { Language } from '../../i18n/translations';
-import { colorMap, fontFamilyMap, formatDate } from '../../utils/colors';
+import { fontFamilyMap, formatDate, resolveAccentHex } from '../../utils/colors';
 
 interface Props { data: CVData; settings: CVSettings; language: Language; }
 
 export const BoldTemplate: React.FC<Props> = ({ data, settings, language }) => {
-  const colors = colorMap[settings.accentColor];
+  const accentHex = resolveAccentHex(settings);
   const font = fontFamilyMap[settings.fontFamily ?? 'inter'];
   const { personalInfo: pi, summary, experience, education, skills, projects, certifications } = data;
   const compact = (settings.fontSize as string) === 'compact';
@@ -16,7 +16,7 @@ export const BoldTemplate: React.FC<Props> = ({ data, settings, language }) => {
 
   const SectionTitle = ({ title }: { title: string }) => (
     <div className="flex items-center gap-2 mb-2">
-      <div className="w-0.5 h-4 rounded-full flex-shrink-0" style={{ background: colors.hex }} />
+      <div className="w-0.5 h-4 rounded-full flex-shrink-0" style={{ background: accentHex }} />
       <h2 className="text-xs font-bold uppercase tracking-widest text-gray-700">{title}</h2>
     </div>
   );
@@ -24,7 +24,7 @@ export const BoldTemplate: React.FC<Props> = ({ data, settings, language }) => {
   return (
     <div style={{ fontFamily: font, minHeight: '1123px' }} className="bg-white">
       {/* ── Header ── */}
-      <div className="px-8 py-6 text-white" style={{ background: colors.hex }}>
+      <div className="px-8 py-6 text-white" style={{ background: accentHex }}>
         <div className="flex items-center justify-between gap-4">
           <div className="min-w-0">
             <h1 className={`font-extrabold leading-tight tracking-tight ${compact ? 'text-2xl' : 'text-3xl'}`}>{pi.name}</h1>
@@ -37,16 +37,16 @@ export const BoldTemplate: React.FC<Props> = ({ data, settings, language }) => {
               {pi.website  && <span>{pi.website}</span>}
             </div>
           </div>
-          {pi.photoUrl && (
+          {pi.photoUrl && settings.photoShape !== 'hidden' && (
             <img src={pi.photoUrl} alt={pi.name}
-              className="w-16 h-16 rounded-full object-cover border-3 border-white border-opacity-50 flex-shrink-0"
+              className={`w-16 h-16 ${settings.photoShape === 'square' ? 'rounded-lg' : 'rounded-full'} object-cover border-2 border-white border-opacity-50 flex-shrink-0`}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
           )}
         </div>
       </div>
 
       {/* Gradient accent bar */}
-      <div className="h-1" style={{ background: `linear-gradient(to right, ${colors.hex}cc, transparent)` }} />
+      <div className="h-1" style={{ background: `linear-gradient(to right, ${accentHex}cc, transparent)` }} />
 
       {/* ── Body: 33% left + 67% right ── */}
       <div className="flex" style={{ minHeight: '1060px' }}>
@@ -63,7 +63,7 @@ export const BoldTemplate: React.FC<Props> = ({ data, settings, language }) => {
                     <div className="flex flex-wrap gap-1">
                       {(cat.skills ?? []).map((s) => (
                         <span key={s} className="text-xs px-1.5 py-0.5 rounded font-medium text-white"
-                          style={{ background: colors.hex + 'cc' }}>
+                          style={{ background: accentHex + 'cc' }}>
                           {s}
                         </span>
                       ))}
@@ -122,11 +122,11 @@ export const BoldTemplate: React.FC<Props> = ({ data, settings, language }) => {
               <SectionTitle title={isEs ? 'Experiencia' : 'Experience'} />
               <div className="space-y-4">
                 {experience.map((exp) => (
-                  <div key={exp.id} className="pl-3 border-l-2" style={{ borderColor: colors.hex + '55' }}>
+                  <div key={exp.id} className="pl-3 border-l-2" style={{ borderColor: accentHex + '55' }}>
                     <div className="flex justify-between items-start gap-2 flex-wrap">
                       <div>
                         <p className={`font-bold text-gray-900 ${compact ? 'text-xs' : 'text-sm'}`}>{exp.position}</p>
-                        <p className="text-xs font-semibold" style={{ color: colors.hex }}>{exp.company}{exp.location ? ` · ${exp.location}` : ''}</p>
+                        <p className="text-xs font-semibold" style={{ color: accentHex }}>{exp.company}{exp.location ? ` · ${exp.location}` : ''}</p>
                       </div>
                       <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full whitespace-nowrap">
                         {fmt(exp.startDate)} – {exp.current ? present : fmt(exp.endDate)}
@@ -137,7 +137,7 @@ export const BoldTemplate: React.FC<Props> = ({ data, settings, language }) => {
                       <ul className="mt-1.5 space-y-0.5">
                         {(exp.highlights ?? []).map((h, i) => (
                           <li key={i} className="flex items-start gap-1.5 text-xs text-gray-600">
-                            <span className="font-bold flex-shrink-0 mt-0.5" style={{ color: colors.hex }}>›</span>
+                            <span className="font-bold flex-shrink-0 mt-0.5" style={{ color: accentHex }}>›</span>
                             <span>{h}</span>
                           </li>
                         ))}
@@ -158,7 +158,7 @@ export const BoldTemplate: React.FC<Props> = ({ data, settings, language }) => {
                     <div className="flex justify-between items-start gap-2">
                       <p className={`font-bold text-gray-900 ${compact ? 'text-xs' : 'text-sm'}`}>{p.name}</p>
                       {(p.url || p.github) && (
-                        <span className="text-xs ml-1" style={{ color: colors.hex }}>{p.url || p.github}</span>
+                        <span className="text-xs ml-1" style={{ color: accentHex }}>{p.url || p.github}</span>
                       )}
                     </div>
                     {p.description && <p className="text-gray-600 text-xs mt-0.5">{p.description}</p>}
@@ -166,7 +166,7 @@ export const BoldTemplate: React.FC<Props> = ({ data, settings, language }) => {
                       <div className="flex flex-wrap gap-1 mt-1">
                         {(p.technologies ?? []).map((t) => (
                           <span key={t} className="text-xs px-1.5 py-0.5 rounded font-medium text-white"
-                            style={{ background: colors.hex }}>
+                            style={{ background: accentHex }}>
                             {t}
                           </span>
                         ))}

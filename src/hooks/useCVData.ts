@@ -3,6 +3,7 @@ import type {
   CVData,
   CVSettings,
   FontSize,
+  CVMargins,
   PersonalInfo,
   WorkExperience,
   Education,
@@ -144,6 +145,7 @@ const defaultSettings: CVSettings = {
   fontFamily: 'inter',
   lineSpacing: 'normal',
   photoShape: 'circle',
+  margins: 'normal',
   hiddenSections: [],
 };
 
@@ -155,6 +157,7 @@ function normalizeSettings(raw: Partial<CVSettings>): CVSettings {
   else if (fs === 'compact') merged.fontSize = 'sm';
   else if (!['xs', 'sm', 'md', 'lg'].includes(fs)) merged.fontSize = 'md' as FontSize;
   if (!Array.isArray(merged.hiddenSections)) merged.hiddenSections = [];
+  if (!['tight', 'normal', 'wide'].includes(merged.margins as string)) merged.margins = 'normal' as CVMargins;
   return merged;
 }
 

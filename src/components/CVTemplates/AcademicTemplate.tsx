@@ -1,12 +1,12 @@
 import React from 'react';
 import type { CVData, CVSettings } from '../../types/cv.types';
 import type { Language } from '../../i18n/translations';
-import { colorMap, fontFamilyMap, formatDate } from '../../utils/colors';
+import { fontFamilyMap, formatDate, resolveAccentHex } from '../../utils/colors';
 
 interface Props { data: CVData; settings: CVSettings; language: Language; }
 
 export const AcademicTemplate: React.FC<Props> = ({ data, settings, language }) => {
-  const colors = colorMap[settings.accentColor];
+  const accentHex = resolveAccentHex(settings);
   const font = fontFamilyMap[settings.fontFamily ?? 'georgia'];
   const { personalInfo: pi, summary, experience, education, skills, projects, certifications } = data;
   const compact = (settings.fontSize as string) === 'compact';
@@ -17,7 +17,7 @@ export const AcademicTemplate: React.FC<Props> = ({ data, settings, language }) 
   const Divider = () => <div className="border-t border-gray-300 my-3" />;
 
   const SectionTitle = ({ title }: { title: string }) => (
-    <h2 className="text-xs font-bold uppercase tracking-widest mb-2.5 pb-0.5" style={{ color: colors.hex, borderBottom: `1.5px solid ${colors.hex}` }}>
+    <h2 className="text-xs font-bold uppercase tracking-widest mb-2.5 pb-0.5" style={{ color: accentHex, borderBottom: `1.5px solid ${accentHex}` }}>
       {title}
     </h2>
   );
@@ -38,10 +38,10 @@ export const AcademicTemplate: React.FC<Props> = ({ data, settings, language }) 
           {pi.linkedin && <span>·  {pi.linkedin}</span>}
           {pi.website  && <span>·  {pi.website}</span>}
         </div>
-        {pi.photoUrl && (
+        {pi.photoUrl && settings.photoShape !== 'hidden' && (
           <div className="flex justify-center mt-3">
             <img src={pi.photoUrl} alt={pi.name}
-              className="w-16 h-16 rounded-full object-cover border-2 border-gray-300"
+              className={`w-16 h-16 ${settings.photoShape === 'square' ? 'rounded-lg' : 'rounded-full'} object-cover border-2 border-gray-300`}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
           </div>
         )}

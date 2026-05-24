@@ -1,7 +1,7 @@
 import React from 'react';
 import type { CVData, CVSettings } from '../../types/cv.types';
 import type { Language } from '../../i18n/translations';
-import { colorMap, fontFamilyMap, formatDate } from '../../utils/colors';
+import { colorMap, fontFamilyMap, formatDate, resolveAccentHex } from '../../utils/colors';
 
 interface Props {
   data: CVData;
@@ -11,6 +11,7 @@ interface Props {
 
 export const CreativeTemplate: React.FC<Props> = ({ data, settings, language }) => {
   const colors = colorMap[settings.accentColor];
+  const accentHex = resolveAccentHex(settings);
   const font = fontFamilyMap[settings.fontFamily ?? 'inter'];
   const { personalInfo: pi, summary, experience, education, skills, projects, certifications } = data;
   const compact = (settings.fontSize as string) === 'compact';
@@ -20,7 +21,7 @@ export const CreativeTemplate: React.FC<Props> = ({ data, settings, language }) 
 
   const SectionBar = ({ title }: { title: string }) => (
     <div className="flex items-center gap-2 mb-3">
-      <div className="w-1 h-4 rounded-full" style={{ background: colors.hex }} />
+      <div className="w-1 h-4 rounded-full" style={{ background: accentHex }} />
       <h2 className={`text-xs font-bold uppercase tracking-widest text-gray-800`}>
         {title}
       </h2>
@@ -43,30 +44,30 @@ export const CreativeTemplate: React.FC<Props> = ({ data, settings, language }) 
         className="flex-shrink-0 flex flex-col"
         style={{
           width: '40%',
-          background: `linear-gradient(160deg, ${colors.hex} 0%, ${darken(colors.hex)} 100%)`,
+          background: `linear-gradient(160deg, ${accentHex} 0%, ${darken(accentHex)} 100%)`,
           minHeight: '100%',
         }}
       >
         {/* Photo + name */}
         <div className="px-6 pt-8 pb-6 text-white">
-          {pi.photoUrl ? (
+          {settings.photoShape !== 'hidden' && (pi.photoUrl ? (
             <div className="mb-5 flex justify-center">
               <img
                 src={pi.photoUrl}
                 alt={pi.name}
-                className="w-24 h-24 rounded-full object-cover border-4 border-white border-opacity-40"
+                className={`w-24 h-24 ${settings.photoShape === 'square' ? 'rounded-xl' : 'rounded-full'} object-cover border-4 border-white border-opacity-40`}
                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
               />
             </div>
           ) : (
             <div className="mb-5 flex justify-center">
-              <div className="w-24 h-24 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
+              <div className={`w-24 h-24 ${settings.photoShape === 'square' ? 'rounded-xl' : 'rounded-full'} bg-white bg-opacity-20 flex items-center justify-center`}>
                 <span className="text-3xl font-bold text-white text-opacity-70">
                   {pi.name ? pi.name[0] : '?'}
                 </span>
               </div>
             </div>
-          )}
+          ))}
           <h1 className={`font-bold text-center leading-tight ${compact ? 'text-lg' : 'text-xl'}`}>
             {pi.name}
           </h1>
@@ -216,7 +217,7 @@ export const CreativeTemplate: React.FC<Props> = ({ data, settings, language }) 
             <SectionBar title={isEs ? 'Proyectos' : 'Projects'} />
             <div className="space-y-3">
               {projects.map((p) => (
-                <div key={p.id} className="border-l-2 pl-3" style={{ borderColor: colors.hex }}>
+                <div key={p.id} className="border-l-2 pl-3" style={{ borderColor: accentHex }}>
                   <p className={`font-bold text-gray-900 ${compact ? 'text-xs' : 'text-sm'}`}>{p.name}</p>
                   {p.description && <p className="text-gray-600 text-xs mt-0.5">{p.description}</p>}
                   {(p.technologies ?? []).length > 0 && (
@@ -225,7 +226,7 @@ export const CreativeTemplate: React.FC<Props> = ({ data, settings, language }) 
                         <span
                           key={t}
                           className="text-xs px-2 py-0.5 rounded-full font-medium"
-                          style={{ background: colors.hex + '20', color: colors.hex }}
+                          style={{ background: accentHex + '20', color: accentHex }}
                         >
                           {t}
                         </span>
@@ -244,7 +245,7 @@ export const CreativeTemplate: React.FC<Props> = ({ data, settings, language }) 
             <div className="space-y-2">
               {certifications.map((cert) => (
                 <div key={cert.id} className="flex items-start gap-2">
-                  <div className="w-2 h-2 rounded-full mt-1 flex-shrink-0" style={{ background: colors.hex }} />
+                  <div className="w-2 h-2 rounded-full mt-1 flex-shrink-0" style={{ background: accentHex }} />
                   <div>
                     <p className="text-xs font-semibold text-gray-800">{cert.name}</p>
                     <p className="text-xs text-gray-500">{cert.issuer}{cert.date ? ` · ${fmt(cert.date)}` : ''}</p>

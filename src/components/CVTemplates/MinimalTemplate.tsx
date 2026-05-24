@@ -42,9 +42,9 @@ export const MinimalTemplate: React.FC<Props> = ({ data, settings, language }) =
             </h1>
             <p className={`mt-1 font-medium ${colors.text} ${compact ? 'text-sm' : 'text-base'}`}>{pi.title}</p>
           </div>
-          {pi.photoUrl && (
+          {pi.photoUrl && settings.photoShape !== 'hidden' && (
             <img src={pi.photoUrl} alt={pi.name}
-              className="w-16 h-16 rounded-lg object-cover ml-4"
+              className={`w-16 h-16 ${settings.photoShape === 'circle' ? 'rounded-full' : 'rounded-lg'} object-cover ml-4`}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
           )}
         </div>

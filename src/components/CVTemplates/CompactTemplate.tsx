@@ -1,7 +1,7 @@
 import React from 'react';
 import type { CVData, CVSettings } from '../../types/cv.types';
 import type { Language } from '../../i18n/translations';
-import { colorMap, fontFamilyMap, formatDate } from '../../utils/colors';
+import { colorMap, fontFamilyMap, formatDate, resolveAccentHex } from '../../utils/colors';
 
 interface Props {
   data: CVData;
@@ -11,6 +11,7 @@ interface Props {
 
 export const CompactTemplate: React.FC<Props> = ({ data, settings, language }) => {
   const colors = colorMap[settings.accentColor];
+  const accentHex = resolveAccentHex(settings);
   const font = fontFamilyMap[settings.fontFamily ?? 'georgia'];
   const { personalInfo: pi, summary, experience, education, skills, projects, certifications } = data;
   const compact = (settings.fontSize as string) === 'compact';
@@ -30,7 +31,7 @@ export const CompactTemplate: React.FC<Props> = ({ data, settings, language }) =
       style={{ fontFamily: font, minHeight: '1123px', lineHeight: '1.4' }}
     >
       {/* Header — tight */}
-      <div className="text-center pb-2 border-b-2" style={{ borderColor: colors.hex }}>
+      <div className="text-center pb-2 border-b-2" style={{ borderColor: accentHex }}>
         <h1 className={`font-bold text-gray-900 ${compact ? 'text-xl' : 'text-2xl'}`}>{pi.name}</h1>
         {pi.title && <p className="text-gray-600 text-sm mt-0.5">{pi.title}</p>}
         <div className="flex flex-wrap justify-center gap-x-3 gap-y-0.5 mt-1.5 text-xs text-gray-500">

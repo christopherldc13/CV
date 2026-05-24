@@ -34,15 +34,15 @@ export const ModernTemplate: React.FC<Props> = ({ data, settings, language }) =>
       <div className={`${colors.sidebar} text-white w-52 flex-shrink-0 px-5 py-6 space-y-5`} style={{ minWidth: '180px' }}>
         {/* Photo + Name */}
         <div className="text-center">
-          {pi.photoUrl ? (
+          {settings.photoShape !== 'hidden' && (pi.photoUrl ? (
             <img src={pi.photoUrl} alt={pi.name}
-              className="w-20 h-20 rounded-full object-cover mx-auto mb-3 border-4 border-white border-opacity-30"
+              className={`w-20 h-20 ${settings.photoShape === 'square' ? 'rounded-lg' : 'rounded-full'} object-cover mx-auto mb-3 border-4 border-white border-opacity-30`}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
           ) : (
-            <div className="w-20 h-20 rounded-full mx-auto mb-3 bg-white bg-opacity-20 flex items-center justify-center">
+            <div className={`w-20 h-20 ${settings.photoShape === 'square' ? 'rounded-lg' : 'rounded-full'} mx-auto mb-3 bg-white bg-opacity-20 flex items-center justify-center`}>
               <span className="text-2xl font-bold opacity-80">{pi.name?.charAt(0) || '?'}</span>
             </div>
-          )}
+          ))}
           <h1 className={`font-bold leading-tight ${compact ? 'text-base' : 'text-lg'}`}>{pi.name}</h1>
           <p className="opacity-80 mt-1 text-xs">{pi.title}</p>
         </div>

@@ -1,12 +1,13 @@
 import React from 'react';
 import type { CVData, CVSettings } from '../../types/cv.types';
 import type { Language } from '../../i18n/translations';
-import { colorMap, fontFamilyMap, formatDate } from '../../utils/colors';
+import { colorMap, fontFamilyMap, formatDate, resolveAccentHex } from '../../utils/colors';
 
 interface Props { data: CVData; settings: CVSettings; language: Language; }
 
 export const ClassicTemplate: React.FC<Props> = ({ data, settings, language }) => {
   const colors = colorMap[settings.accentColor];
+  const accentHex = resolveAccentHex(settings);
   const font = fontFamilyMap[settings.fontFamily ?? 'georgia'];
   const { personalInfo: pi, summary, experience, education, skills, projects, certifications } = data;
   const compact = (settings.fontSize as string) === 'compact';
@@ -25,14 +26,14 @@ export const ClassicTemplate: React.FC<Props> = ({ data, settings, language }) =
       <svg className="w-2.5 h-2.5 flex-shrink-0 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
       </svg>
-      {fmt(start)} – {current ? <span className="font-semibold" style={{ color: colors.hex }}>{present}</span> : fmt(end)}
+      {fmt(start)} – {current ? <span className="font-semibold" style={{ color: accentHex }}>{present}</span> : fmt(end)}
     </span>
   );
 
   const TechChip = ({ label }: { label: string }) => (
     <span
       className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border"
-      style={{ color: colors.hex, borderColor: colors.hex + '55', background: colors.hex + '0d' }}
+      style={{ color: accentHex, borderColor: accentHex + '55', background: accentHex + '0d' }}
     >
       {label}
     </span>
@@ -42,11 +43,11 @@ export const ClassicTemplate: React.FC<Props> = ({ data, settings, language }) =
     <div className={`bg-white ${compact ? 'text-xs' : 'text-sm'}`} style={{ fontFamily: font, minHeight: '1123px' }}>
 
       {/* ── Header ── */}
-      <div className="px-8 py-6 text-white" style={{ background: colors.hex }}>
+      <div className="px-8 py-6 text-white" style={{ background: accentHex }}>
         <div className="flex items-center gap-5">
-          {pi.photoUrl && (
+          {pi.photoUrl && settings.photoShape !== 'hidden' && (
             <img src={pi.photoUrl} alt={pi.name}
-              className="w-16 h-16 rounded-full object-cover border-2 border-white border-opacity-50 flex-shrink-0"
+              className={`w-16 h-16 ${settings.photoShape === 'square' ? 'rounded-lg' : 'rounded-full'} object-cover border-2 border-white border-opacity-50 flex-shrink-0`}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
           )}
           <div className="flex-1 min-w-0">
@@ -81,11 +82,11 @@ export const ClassicTemplate: React.FC<Props> = ({ data, settings, language }) =
               <SectionTitle title={isEs ? 'Experiencia Laboral' : 'Work Experience'} />
               <div className="space-y-4">
                 {experience.map((exp) => (
-                  <div key={exp.id} className="pl-3 border-l-2" style={{ borderColor: colors.hex + '40' }}>
+                  <div key={exp.id} className="pl-3 border-l-2" style={{ borderColor: accentHex + '40' }}>
                     <div className="flex justify-between items-start gap-2 flex-wrap">
                       <div>
                         <p className={`font-bold text-gray-900 leading-tight ${compact ? 'text-xs' : 'text-sm'}`}>{exp.position}</p>
-                        <p className="text-xs font-semibold mt-0.5" style={{ color: colors.hex }}>
+                        <p className="text-xs font-semibold mt-0.5" style={{ color: accentHex }}>
                           {exp.company}{exp.location ? <span className="font-normal text-gray-500"> · {exp.location}</span> : ''}
                         </p>
                       </div>
@@ -98,7 +99,7 @@ export const ClassicTemplate: React.FC<Props> = ({ data, settings, language }) =
                       <ul className="mt-1.5 space-y-1">
                         {(exp.highlights ?? []).map((h, i) => (
                           <li key={i} className="flex items-start gap-2 text-xs text-gray-700">
-                            <span className="mt-1 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: colors.hex }} />
+                            <span className="mt-1 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: accentHex }} />
                             <span>{h}</span>
                           </li>
                         ))}
@@ -129,7 +130,7 @@ export const ClassicTemplate: React.FC<Props> = ({ data, settings, language }) =
                       </div>
                     )}
                     {(p.url || p.github) && (
-                      <p className="text-xs mt-1.5" style={{ color: colors.hex }}>
+                      <p className="text-xs mt-1.5" style={{ color: accentHex }}>
                         {p.url && <span>🔗 {p.url}</span>}
                         {p.url && p.github && <span className="mx-2 text-gray-300">|</span>}
                         {p.github && <span>⌥ {p.github}</span>}
@@ -143,7 +144,7 @@ export const ClassicTemplate: React.FC<Props> = ({ data, settings, language }) =
         </div>
 
         {/* ── Right sidebar ── */}
-        <div className="w-44 flex-shrink-0 px-4 py-5 border-l border-gray-100 space-y-5" style={{ background: colors.hex + '08', minWidth: '168px' }}>
+        <div className="w-44 flex-shrink-0 px-4 py-5 border-l border-gray-100 space-y-5" style={{ background: accentHex + '08', minWidth: '168px' }}>
 
           {education.length > 0 && (
             <div>
@@ -155,7 +156,7 @@ export const ClassicTemplate: React.FC<Props> = ({ data, settings, language }) =
                     <p className="text-gray-600 text-xs mt-0.5">{edu.degree}</p>
                     {edu.field && <p className="text-gray-500 text-xs italic">{edu.field}</p>}
                     {edu.gpa && (
-                      <span className="inline-block mt-0.5 text-xs font-semibold px-1.5 py-0.5 rounded" style={{ background: colors.hex + '15', color: colors.hex }}>
+                      <span className="inline-block mt-0.5 text-xs font-semibold px-1.5 py-0.5 rounded" style={{ background: accentHex + '15', color: accentHex }}>
                         GPA {edu.gpa}
                       </span>
                     )}
@@ -198,7 +199,7 @@ export const ClassicTemplate: React.FC<Props> = ({ data, settings, language }) =
                     <p className="text-xs font-bold text-gray-800 leading-tight">{cert.name}</p>
                     <p className="text-xs text-gray-500 mt-0.5">{cert.issuer}</p>
                     {cert.date && (
-                      <span className="inline-block mt-1 text-xs font-medium px-1.5 py-0.5 rounded" style={{ background: colors.hex + '15', color: colors.hex }}>
+                      <span className="inline-block mt-1 text-xs font-medium px-1.5 py-0.5 rounded" style={{ background: accentHex + '15', color: accentHex }}>
                         {fmt(cert.date)}
                       </span>
                     )}

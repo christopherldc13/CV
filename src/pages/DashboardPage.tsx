@@ -24,6 +24,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ language, onEditCV
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
 
   const isEs = language === 'es';
 
@@ -33,6 +34,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ language, onEditCV
     newCV: isEs ? 'Nuevo CV' : 'New CV',
     edit: isEs ? 'Editar' : 'Edit',
     delete: isEs ? 'Eliminar' : 'Delete',
+    duplicate: isEs ? 'Duplicar' : 'Duplicate',
     confirmDelete: isEs ? '¿Eliminar este CV?' : 'Delete this CV?',
     lastUpdated: isEs ? 'Actualizado' : 'Updated',
     emptyTitle: isEs ? 'Aún no tienes CVs' : 'No CVs yet',
@@ -81,6 +83,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ language, onEditCV
         fontFamily: 'inter',
         lineSpacing: 'normal',
         photoShape: 'circle',
+        margins: 'normal',
         hiddenSections: [],
       };
       const res = await api.post('/cvs', {
@@ -99,6 +102,23 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ language, onEditCV
 
   const handleEdit = (cv: CVRecord) => {
     onEditCV(cv._id, cv.cvData, cv.settings, cv.language, cv.title);
+  };
+
+  const handleDuplicate = async (cv: CVRecord) => {
+    setDuplicatingId(cv._id);
+    try {
+      const res = await api.post('/cvs', {
+        title: `${cv.title} (${isEs ? 'copia' : 'copy'})`,
+        cvData: cv.cvData,
+        settings: cv.settings,
+        language: cv.language,
+      });
+      setCvs((prev) => [res.data, ...prev]);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDuplicatingId(null);
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -130,6 +150,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ language, onEditCV
       creative: { es: 'Creativo', en: 'Creative' },
       tech: { es: 'Tech', en: 'Tech' },
       compact: { es: 'Compacto', en: 'Compact' },
+      bold: { es: 'Negrita', en: 'Bold' },
+      academic: { es: 'Académico', en: 'Academic' },
+      elegant: { es: 'Elegante', en: 'Elegant' },
+      timeline: { es: 'Cronología', en: 'Timeline' },
     };
     return isEs ? (map[t]?.es ?? t) : (map[t]?.en ?? t);
   };
@@ -256,14 +280,24 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ language, onEditCV
                     {ui.edit}
                   </button>
                   <button
+                    onClick={() => handleDuplicate(cv)}
+                    disabled={duplicatingId === cv._id}
+                    title={ui.duplicate}
+                    className="flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-semibold text-gray-600 bg-gray-50 rounded-xl hover:bg-gray-100 border border-gray-200 transition disabled:opacity-50"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                  </button>
+                  <button
                     onClick={() => handleDelete(cv._id)}
                     disabled={deletingId === cv._id}
-                    className="flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-semibold text-red-600 bg-red-50 rounded-xl hover:bg-red-100 transition disabled:opacity-50"
+                    title={ui.delete}
+                    className="flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-semibold text-red-600 bg-red-50 rounded-xl hover:bg-red-100 transition disabled:opacity-50"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
-                    {ui.delete}
                   </button>
                 </div>
               </div>

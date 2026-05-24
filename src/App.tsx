@@ -8,6 +8,9 @@ import { FontSizeControl } from './components/FontSizeControl';
 import { SpacingControl } from './components/SpacingControl';
 import { SectionVisibility } from './components/SectionVisibility';
 import { PhotoShapeControl } from './components/PhotoShapeControl';
+import { MarginControl } from './components/MarginControl';
+import { ThemePresets } from './components/ThemePresets';
+import { CVCompletion } from './components/CVCompletion';
 import { ExportButton } from './components/ExportButton';
 import { PersonalInfoForm } from './components/CVForm/PersonalInfoForm';
 import { SummaryForm } from './components/CVForm/SummaryForm';
@@ -33,10 +36,11 @@ import { AuthPage } from './pages/AuthPage';
 import { DashboardPage } from './pages/DashboardPage';
 import api from './services/api';
 import { colorMap } from './utils/colors';
-import type { FormSection, CVData, CVSettings, FontSize, LineSpacing } from './types/cv.types';
+import type { FormSection, CVData, CVSettings, FontSize, LineSpacing, CVMargins } from './types/cv.types';
 
 const fontSizeZoom: Record<FontSize, number> = { xs: 0.78, sm: 0.88, md: 1, lg: 1.12 };
 const lineSpacingMap: Record<LineSpacing, string> = { tight: '1.3', normal: '1.55', relaxed: '1.75' };
+const marginsMap: Record<CVMargins, string> = { tight: '8px', normal: '24px', wide: '48px' };
 
 const SECTIONS: FormSection[] = [
   'personal',
@@ -451,6 +455,11 @@ function EditorView({
                 <Sidebar activeSection={activeSection} onSelect={setActiveSection} language={language} />
               </div>
               <div className="p-4 border-t border-gray-100 space-y-4 bg-gray-50">
+                <CVCompletion data={cvData} language={language} />
+                <ThemePresets
+                  onChange={(v) => updateSettings({ ...v, customColor: undefined })}
+                  language={language}
+                />
                 <TemplateSelector
                   selected={settings.template}
                   onChange={(t) => updateSettings({ template: t })}
@@ -476,6 +485,11 @@ function EditorView({
                 <SpacingControl
                   selected={settings.lineSpacing ?? 'normal'}
                   onChange={(s) => updateSettings({ lineSpacing: s })}
+                  language={language}
+                />
+                <MarginControl
+                  selected={settings.margins ?? 'normal'}
+                  onChange={(m) => updateSettings({ margins: m })}
                   language={language}
                 />
                 <PhotoShapeControl
@@ -561,7 +575,11 @@ function EditorView({
 
           {/* Scrollable CV — horizontal scroll on mobile so template isn't clipped */}
           <div className="flex-1 overflow-auto print:overflow-visible">
-            <div className="p-3 sm:p-6 sm:flex sm:justify-center print:block print:p-0">
+            <div
+              className="print:block print:p-0"
+              style={{ padding: marginsMap[settings.margins ?? 'normal'] }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
               <div
                 ref={previewRef}
                 id="cv-preview"
@@ -576,6 +594,7 @@ function EditorView({
                 } as React.CSSProperties}
               >
                 <ErrorBoundary>{renderTemplate()}</ErrorBoundary>
+              </div>
               </div>
             </div>
           </div>
@@ -602,11 +621,9 @@ function EditorView({
               </button>
             </div>
             <div className="overflow-y-auto flex-1 p-5 space-y-4">
-              <TemplateSelector
-                selected={settings.template}
-                onChange={(t) => updateSettings({ template: t })}
-                language={language}
-              />
+              <CVCompletion data={cvData} language={language} />
+              <ThemePresets onChange={(v) => updateSettings({ ...v, customColor: undefined })} language={language} />
+              <TemplateSelector selected={settings.template} onChange={(t) => updateSettings({ template: t })} language={language} />
               <ColorPicker
                 selected={settings.accentColor}
                 onChange={(c) => updateSettings({ accentColor: c, customColor: undefined })}
@@ -614,31 +631,12 @@ function EditorView({
                 onCustomColor={(hex) => updateSettings({ customColor: hex })}
                 language={language}
               />
-              <FontPicker
-                selected={settings.fontFamily ?? 'inter'}
-                onChange={(f) => updateSettings({ fontFamily: f })}
-                language={language}
-              />
-              <FontSizeControl
-                selected={settings.fontSize ?? 'md'}
-                onChange={(s) => updateSettings({ fontSize: s })}
-                language={language}
-              />
-              <SpacingControl
-                selected={settings.lineSpacing ?? 'normal'}
-                onChange={(s) => updateSettings({ lineSpacing: s })}
-                language={language}
-              />
-              <PhotoShapeControl
-                selected={settings.photoShape ?? 'circle'}
-                onChange={(s) => updateSettings({ photoShape: s })}
-                language={language}
-              />
-              <SectionVisibility
-                hidden={settings.hiddenSections ?? []}
-                onChange={(h) => updateSettings({ hiddenSections: h })}
-                language={language}
-              />
+              <FontPicker selected={settings.fontFamily ?? 'inter'} onChange={(f) => updateSettings({ fontFamily: f })} language={language} />
+              <FontSizeControl selected={settings.fontSize ?? 'md'} onChange={(s) => updateSettings({ fontSize: s })} language={language} />
+              <SpacingControl selected={settings.lineSpacing ?? 'normal'} onChange={(s) => updateSettings({ lineSpacing: s })} language={language} />
+              <MarginControl selected={settings.margins ?? 'normal'} onChange={(m) => updateSettings({ margins: m })} language={language} />
+              <PhotoShapeControl selected={settings.photoShape ?? 'circle'} onChange={(s) => updateSettings({ photoShape: s })} language={language} />
+              <SectionVisibility hidden={settings.hiddenSections ?? []} onChange={(h) => updateSettings({ hiddenSections: h })} language={language} />
               <ExportButton onExportJSON={exportJSON} onImportJSON={importJSON} language={language} />
             </div>
           </div>

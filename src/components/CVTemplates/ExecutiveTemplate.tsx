@@ -1,7 +1,7 @@
 import React from 'react';
 import type { CVData, CVSettings } from '../../types/cv.types';
 import type { Language } from '../../i18n/translations';
-import { colorMap, fontFamilyMap, formatDate } from '../../utils/colors';
+import { colorMap, fontFamilyMap, formatDate, resolveAccentHex } from '../../utils/colors';
 
 interface Props {
   data: CVData;
@@ -11,6 +11,7 @@ interface Props {
 
 export const ExecutiveTemplate: React.FC<Props> = ({ data, settings, language }) => {
   const colors = colorMap[settings.accentColor];
+  const accentHex = resolveAccentHex(settings);
   const font = fontFamilyMap[settings.fontFamily ?? 'georgia'];
   const { personalInfo: pi, summary, experience, education, skills, projects, certifications } = data;
   const compact = (settings.fontSize as string) === 'compact';
@@ -22,7 +23,7 @@ export const ExecutiveTemplate: React.FC<Props> = ({ data, settings, language })
     <span
       className="inline-block w-2 h-2 flex-shrink-0 mt-1 mr-2"
       style={{
-        background: colors.hex,
+        background: accentHex,
         transform: 'rotate(45deg)',
         display: 'inline-block',
       }}
@@ -50,11 +51,11 @@ export const ExecutiveTemplate: React.FC<Props> = ({ data, settings, language })
       {/* Full-width dark navy header */}
       <div className="bg-gray-900 text-white px-8 py-8">
         <div className="flex items-center gap-6">
-          {pi.photoUrl && (
+          {pi.photoUrl && settings.photoShape !== 'hidden' && (
             <img
               src={pi.photoUrl}
               alt={pi.name}
-              className="w-20 h-20 rounded-full object-cover border-2 border-amber-400 flex-shrink-0"
+              className={`w-20 h-20 ${settings.photoShape === 'square' ? 'rounded-lg' : 'rounded-full'} object-cover border-2 border-amber-400 flex-shrink-0`}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           )}
