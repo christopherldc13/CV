@@ -213,12 +213,13 @@ function EditorView({
       const pageH = pdf.internal.pageSize.getHeight();  // 297 mm
       const imgH = (canvas.height / canvas.width) * pageW;
 
-      // Multi-page: slide the full-height image across each page
-      let page = 0;
-      while (page * pageH < imgH) {
-        if (page > 0) pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, -(page * pageH), pageW, imgH);
-        page++;
+      // Only add an extra page when there are >10 mm of real content beyond the
+      // current page. This prevents a near-blank trailing page caused by the
+      // line-height CSS injection adding a few pixels beyond minHeight: 1123px.
+      const numPages = Math.max(1, Math.ceil((imgH - 10) / pageH));
+      for (let p = 0; p < numPages; p++) {
+        if (p > 0) pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, -(p * pageH), pageW, imgH);
       }
 
       const name = (cvData.personalInfo.name || 'CV').replace(/\s+/g, '_');
