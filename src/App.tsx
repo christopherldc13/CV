@@ -38,7 +38,14 @@ import api from './services/api';
 import { colorMap } from './utils/colors';
 import type { FormSection, CVData, CVSettings, FontSize, LineSpacing, CVMargins } from './types/cv.types';
 
-const fontSizeZoom: Record<FontSize, number> = { xs: 0.78, sm: 0.88, md: 1, lg: 1.12 };
+// Actual font-size pixel values per setting — injected as CSS overrides so
+// html2canvas, print, and browser all render identical text sizes.
+const fontSizePx: Record<FontSize, Record<string, number>> = {
+  xs: { xs: 9,    sm: 10.5, base: 12,   lg: 13.5, xl: 15,   '2xl': 19,  '3xl': 23 },
+  sm: { xs: 10.5, sm: 12,   base: 13.5, lg: 15,   xl: 17,   '2xl': 21,  '3xl': 26 },
+  md: { xs: 12,   sm: 14,   base: 16,   lg: 18,   xl: 20,   '2xl': 24,  '3xl': 30 },
+  lg: { xs: 13.5, sm: 16,   base: 18,   lg: 21,   xl: 23,   '2xl': 28,  '3xl': 35 },
+};
 const lineSpacingMap: Record<LineSpacing, string> = { tight: '1.3', normal: '1.55', relaxed: '1.75' };
 const marginsMap: Record<CVMargins, string> = { tight: '8px', normal: '24px', wide: '48px' };
 
@@ -75,7 +82,10 @@ function EditorView({
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [mobilePanel, setMobilePanel] = useState<'form' | 'preview'>('form');
   const [showMobileSettings, setShowMobileSettings] = useState(false);
+  const [previewScale, setPreviewScale] = useState(1);
+  const [isPDFExporting, setIsPDFExporting] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
+  const previewPanelRef = useRef<HTMLDivElement>(null);
   const { language, setLanguage } = useLanguage();
 
   useEffect(() => {
@@ -83,6 +93,17 @@ function EditorView({
       setLanguage(editingCV.language as 'en' | 'es');
     }
   }, [editingCV.language, setLanguage]);
+
+  // Scale the preview to fit the panel width dynamically
+  useEffect(() => {
+    const observer = new ResizeObserver(([entry]) => {
+      const available = entry.contentRect.width - 64;
+      setPreviewScale(Math.min(1, Math.max(0.4, available / 794)));
+    });
+    const el = previewPanelRef.current;
+    if (el) observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const {
     cvData,
@@ -111,6 +132,33 @@ function EditorView({
 
   const isEs = language === 'es';
 
+  // Inject real font-size + line-height CSS so browser, html2canvas, and print all agree
+  useEffect(() => {
+    const id = 'cv-dynamic-styles';
+    let style = document.getElementById(id) as HTMLStyleElement | null;
+    if (!style) {
+      style = document.createElement('style');
+      style.id = id;
+      document.head.appendChild(style);
+    }
+    const s = fontSizePx[settings.fontSize ?? 'md'];
+    const lh = lineSpacingMap[settings.lineSpacing ?? 'normal'];
+    style.textContent = `
+      #cv-preview .text-xs   { font-size: ${s.xs}px !important; }
+      #cv-preview .text-sm   { font-size: ${s.sm}px !important; }
+      #cv-preview .text-base { font-size: ${s.base}px !important; }
+      #cv-preview .text-lg   { font-size: ${s.lg}px !important; }
+      #cv-preview .text-xl   { font-size: ${s.xl}px !important; }
+      #cv-preview .text-2xl  { font-size: ${s['2xl']}px !important; }
+      #cv-preview .text-3xl  { font-size: ${s['3xl']}px !important; }
+      #cv-preview p, #cv-preview span, #cv-preview li,
+      #cv-preview h1, #cv-preview h2, #cv-preview h3, #cv-preview a {
+        line-height: ${lh} !important;
+      }
+    `;
+    return () => { document.getElementById(id)?.remove(); };
+  }, [settings.fontSize, settings.lineSpacing]);
+
   const handleSave = useCallback(async () => {
     setSaveStatus('saving');
     try {
@@ -127,6 +175,60 @@ function EditorView({
       setSaveStatus('idle');
     }
   }, [editingCV.id, cvTitle, cvData, settings, language]);
+
+  const handleExportPDF = useCallback(async () => {
+    const preview = document.getElementById('cv-preview');
+    if (!preview) return;
+    setIsPDFExporting(true);
+    try {
+      // Temporarily set zoom to 1 on the display wrapper so html2canvas
+      // captures the natural 794px width, not the display-scaled version.
+      const zoomWrapper = preview.parentElement as HTMLElement | null;
+      const savedZoom = zoomWrapper?.style.zoom ?? '';
+      const savedShadow = preview.style.boxShadow;
+      if (zoomWrapper) zoomWrapper.style.zoom = '1';
+      preview.style.boxShadow = 'none';
+      await new Promise<void>((r) => setTimeout(r, 80));
+
+      const html2canvas = (await import('html2canvas')).default;
+      const { jsPDF } = await import('jspdf');
+
+      const canvas = await html2canvas(preview, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: '#ffffff',
+        logging: false,
+        imageTimeout: 15000,
+        removeContainer: true,
+      });
+
+      // Restore display state
+      if (zoomWrapper) zoomWrapper.style.zoom = savedZoom;
+      preview.style.boxShadow = savedShadow;
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.97);
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pageW = pdf.internal.pageSize.getWidth();   // 210 mm
+      const pageH = pdf.internal.pageSize.getHeight();  // 297 mm
+      const imgH = (canvas.height / canvas.width) * pageW;
+
+      // Multi-page: slide the full-height image across each page
+      let page = 0;
+      while (page * pageH < imgH) {
+        if (page > 0) pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, -(page * pageH), pageW, imgH);
+        page++;
+      }
+
+      const name = (cvData.personalInfo.name || 'CV').replace(/\s+/g, '_');
+      pdf.save(`${name}.pdf`);
+    } catch (err) {
+      console.error('PDF export failed:', err);
+    } finally {
+      setIsPDFExporting(false);
+    }
+  }, [cvData.personalInfo.name]);
 
   const sectionTitles: Record<FormSection, string> = {
     personal: isEs ? 'Información Personal' : 'Personal Info',
@@ -502,7 +604,7 @@ function EditorView({
                   onChange={(h) => updateSettings({ hiddenSections: h })}
                   language={language}
                 />
-                <ExportButton onExportJSON={exportJSON} onImportJSON={importJSON} language={language} />
+                <ExportButton onExportJSON={exportJSON} onImportJSON={importJSON} onExportPDF={handleExportPDF} isPDFExporting={isPDFExporting} language={language} />
               </div>
             </div>
 
@@ -573,28 +675,37 @@ function EditorView({
             </div>
           </div>
 
-          {/* Scrollable CV — horizontal scroll on mobile so template isn't clipped */}
-          <div className="flex-1 overflow-auto print:overflow-visible">
+          {/* Scrollable CV panel — ref for ResizeObserver to compute display scale */}
+          <div ref={previewPanelRef} className="flex-1 overflow-auto print:overflow-visible">
             <div
               className="print:block print:p-0"
-              style={{ padding: marginsMap[settings.margins ?? 'normal'] }}
+              style={{
+                padding: marginsMap[settings.margins ?? 'normal'],
+                display: 'flex',
+                justifyContent: 'center',
+                minHeight: '100%',
+                alignItems: 'flex-start',
+              }}
             >
-              <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <div
-                ref={previewRef}
-                id="cv-preview"
-                className="bg-white relative print:static print:mx-auto print:shadow-none"
-                style={{
-                  width: '794px',
-                  minHeight: '1123px',
-                  boxShadow: '0 20px 60px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.08)',
-                  zoom: fontSizeZoom[settings.fontSize ?? 'md'],
-                  lineHeight: lineSpacingMap[settings.lineSpacing ?? 'normal'],
-                  '--cv-accent': settings.customColor ?? colorMap[settings.accentColor]?.hex ?? '#2563eb',
-                } as React.CSSProperties}
-              >
-                <ErrorBoundary>{renderTemplate()}</ErrorBoundary>
-              </div>
+              {/*
+                Zoom wrapper shrinks cv-preview visually to fit the panel.
+                html2canvas only captures the element it's given — parent zoom
+                is NOT inherited, so the PDF is always full-resolution 794px.
+              */}
+              <div style={{ zoom: previewScale } as React.CSSProperties}>
+                <div
+                  ref={previewRef}
+                  id="cv-preview"
+                  className="bg-white relative print:static print:mx-auto print:shadow-none"
+                  style={{
+                    width: '794px',
+                    minHeight: '1123px',
+                    boxShadow: '0 20px 60px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.08)',
+                    '--cv-accent': settings.customColor ?? colorMap[settings.accentColor]?.hex ?? '#2563eb',
+                  } as React.CSSProperties}
+                >
+                  <ErrorBoundary>{renderTemplate()}</ErrorBoundary>
+                </div>
               </div>
             </div>
           </div>
@@ -637,7 +748,7 @@ function EditorView({
               <MarginControl selected={settings.margins ?? 'normal'} onChange={(m) => updateSettings({ margins: m })} language={language} />
               <PhotoShapeControl selected={settings.photoShape ?? 'circle'} onChange={(s) => updateSettings({ photoShape: s })} language={language} />
               <SectionVisibility hidden={settings.hiddenSections ?? []} onChange={(h) => updateSettings({ hiddenSections: h })} language={language} />
-              <ExportButton onExportJSON={exportJSON} onImportJSON={importJSON} language={language} />
+              <ExportButton onExportJSON={exportJSON} onImportJSON={importJSON} onExportPDF={handleExportPDF} isPDFExporting={isPDFExporting} language={language} />
             </div>
           </div>
         </div>
