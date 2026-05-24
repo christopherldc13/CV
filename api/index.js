@@ -1,18 +1,9 @@
-const mongoose = require('mongoose');
-const app = require('../backend/src/app');
+import mongoose from 'mongoose';
+import app from '../backend/src/app.js';
 
 let isConnected = false;
 
-module.exports = async (req, res) => {
-  // Diagnostic: show env state
-  if (req.url === '/api/health') {
-    return res.status(200).json({
-      mongoUriSet: !!process.env.MONGODB_URI,
-      mongoState: mongoose.connection.readyState,
-      nodeEnv: process.env.NODE_ENV,
-    });
-  }
-
+export default async (req, res) => {
   if (!isConnected) {
     if (!process.env.MONGODB_URI) {
       return res.status(500).json({ message: 'MONGODB_URI env var is not set' });

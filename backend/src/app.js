@@ -1,17 +1,12 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-
-const authRoutes = require('./routes/auth');
-const cvsRoutes = require('./routes/cvs');
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import authRoutes from './routes/auth.js';
+import cvsRoutes from './routes/cvs.js';
 
 const app = express();
 
-const allowedOrigins = [
-  'http://localhost:5173',
-  process.env.FRONTEND_URL,
-].filter(Boolean);
-
+const allowedOrigins = ['http://localhost:5173', process.env.FRONTEND_URL].filter(Boolean);
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
 
@@ -23,4 +18,4 @@ app.get('/api/health', (_req, res) => res.json({
   mongoUri: !!process.env.MONGODB_URI,
 }));
 
-module.exports = app;
+export default app;

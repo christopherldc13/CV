@@ -1,12 +1,10 @@
-const express = require('express');
-const router = express.Router();
-const CV = require('../models/CV');
-const authMiddleware = require('../middleware/auth');
+import express from 'express';
+import CV from '../models/CV.js';
+import authMiddleware from '../middleware/auth.js';
 
-// All CV routes are protected
+const router = express.Router();
 router.use(authMiddleware);
 
-// GET /api/cvs — all CVs for current user
 router.get('/', async (req, res) => {
   try {
     const cvs = await CV.find({ userId: req.user.id }).sort({ updatedAt: -1 });
@@ -17,7 +15,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST /api/cvs — create new CV
 router.post('/', async (req, res) => {
   try {
     const { title, cvData, settings, language } = req.body;
@@ -25,7 +22,7 @@ router.post('/', async (req, res) => {
       userId: req.user.id,
       title: title || 'Mi CV Principal',
       cvData: cvData || {},
-      settings: settings || { template: 'modern', accentColor: 'blue', fontSize: 'normal' },
+      settings: settings || { template: 'modern', accentColor: 'blue', fontSize: 'normal', fontFamily: 'inter' },
       language: language || 'es',
     });
     res.status(201).json(cv);
@@ -35,7 +32,6 @@ router.post('/', async (req, res) => {
   }
 });
 
-// GET /api/cvs/:id — single CV (owned by user)
 router.get('/:id', async (req, res) => {
   try {
     const cv = await CV.findOne({ _id: req.params.id, userId: req.user.id });
@@ -47,7 +43,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// PUT /api/cvs/:id — update CV
 router.put('/:id', async (req, res) => {
   try {
     const { title, cvData, settings, language } = req.body;
@@ -64,7 +59,6 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/cvs/:id — delete CV
 router.delete('/:id', async (req, res) => {
   try {
     const cv = await CV.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
@@ -76,4 +70,4 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
