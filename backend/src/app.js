@@ -17,6 +17,10 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/cvs', cvsRoutes);
-app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
+app.get('/api/health', (_req, res) => res.json({
+  status: 'ok',
+  jwtSecret: !!process.env.JWT_SECRET,
+  mongoUri: !!process.env.MONGODB_URI,
+}));
 
 module.exports = app;
