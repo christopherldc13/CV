@@ -62,84 +62,76 @@ export const AuthPage: React.FC<AuthPageProps> = ({ language }) => {
   };
 
   return (
-    <div className="h-screen flex overflow-hidden">
-      {/* Left panel — dark gradient */}
-      <div
-        className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12"
-        style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #1d4ed8 100%)' }}
-      >
-        {/* Logo */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-white bg-opacity-20 flex items-center justify-center">
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </div>
-          <span className="text-white text-xl font-bold tracking-tight">CV Builder</span>
-          <span className="text-xs bg-blue-500 bg-opacity-60 text-blue-100 px-2 py-0.5 rounded-full font-semibold">Pro</span>
-        </div>
+    <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-slate-900 selection:bg-blue-500/30">
+      {/* Animated Background Blobs */}
+      <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+      <div className="absolute top-0 -right-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+      <div className="absolute -bottom-8 left-20 w-72 h-72 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
 
-        {/* Hero text */}
-        <div className="space-y-6">
-          <h1 className="text-4xl font-bold text-white leading-tight">
-            {isEs ? 'Tu carrera, tu historia.' : 'Your career, your story.'}
-          </h1>
-          <p className="text-blue-200 text-lg leading-relaxed">
-            {isEs
-              ? 'Diseña currículums que abran puertas. Plantillas modernas, personalización total y exportación instantánea.'
-              : 'Design resumes that open doors. Modern templates, full customization, and instant export.'}
-          </p>
+      <div className="relative z-10 w-full max-w-5xl flex flex-col lg:flex-row items-center justify-center p-4 sm:p-8 gap-8 lg:gap-16">
+        
+        {/* Left Content */}
+        <div className="flex-1 text-center lg:text-left space-y-8 max-w-lg w-full">
+          {/* Logo */}
+          <div className="flex items-center justify-center lg:justify-start gap-3 transform hover:scale-105 transition-transform duration-300">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight text-white drop-shadow-md">CV Builder</h1>
+            <span className="text-xs font-bold uppercase tracking-wider bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full border border-blue-500/30">Pro</span>
+          </div>
+
+          <div className="space-y-4">
+            <h2 className="text-4xl lg:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 leading-tight">
+              {isEs ? 'Tu carrera,' : 'Your career,'}<br/>{isEs ? 'tu historia.' : 'your story.'}
+            </h2>
+            <p className="text-slate-300 text-lg lg:text-xl leading-relaxed">
+              {isEs
+                ? 'Diseña currículums que abran puertas. Plantillas modernas, personalización total y exportación instantánea.'
+                : 'Design resumes that open doors. Modern templates, full customization, and instant export.'}
+            </p>
+          </div>
 
           {/* Feature pills */}
-          <div className="flex flex-wrap gap-3 pt-2">
-            {[ui.feature1, ui.feature2, ui.feature3, ui.feature4].map((f) => (
-              <div key={f} className="flex items-center gap-2 bg-white bg-opacity-10 rounded-full px-4 py-2">
-                <svg className="w-4 h-4 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="hidden sm:flex flex-wrap gap-3 justify-center lg:justify-start">
+            {[ui.feature1, ui.feature2, ui.feature3, ui.feature4].map((f, i) => (
+              <div key={f} className="flex items-center gap-2 glass-panel rounded-full px-4 py-2 hover:bg-white/10 transition-colors duration-300" style={{ animationDelay: `${i * 100}ms` }}>
+                <svg className="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                 </svg>
-                <span className="text-white text-sm">{f}</span>
+                <span className="text-slate-200 text-sm font-medium">{f}</span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Bottom decoration */}
-        <div className="text-blue-400 text-sm">
-          &copy; {new Date().getFullYear()} CV Builder
-        </div>
-      </div>
-
-      {/* Right panel — form */}
-      <div className="flex-1 flex items-center justify-center bg-gray-50 p-4 sm:p-8">
+        {/* Right Content - Auth Form */}
         <div className="w-full max-w-md">
-          {/* Mobile logo */}
-          <div className="flex items-center gap-2 mb-8 lg:hidden">
-            <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center">
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
+          <div className="glass-panel rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
+            {/* Inner top glow */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-emerald-500 opacity-50"></div>
+            
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-bold text-white mb-2">{ui.welcome}</h2>
+              <p className="text-slate-400 text-sm">{ui.subtitle}</p>
             </div>
-            <span className="text-gray-900 text-lg font-bold">CV Builder</span>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 sm:p-8">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">{ui.welcome}</h2>
-            <p className="text-gray-500 text-sm mb-6">{ui.subtitle}</p>
 
             {/* Tabs */}
-            <div className="flex rounded-xl border border-gray-200 p-1 mb-6 bg-gray-50">
+            <div className="flex rounded-xl bg-slate-900/50 p-1 mb-8 border border-slate-700/50">
               <button
                 onClick={() => { setTab('login'); setError(''); }}
-                className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${
-                  tab === 'login' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all duration-300 ${
+                  tab === 'login' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' : 'text-slate-400 hover:text-white hover:bg-slate-800'
                 }`}
               >
                 {ui.login}
               </button>
               <button
                 onClick={() => { setTab('register'); setError(''); }}
-                className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${
-                  tab === 'register' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all duration-300 ${
+                  tab === 'register' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' : 'text-slate-400 hover:text-white hover:bg-slate-800'
                 }`}
               >
                 {ui.register}
@@ -148,16 +140,17 @@ export const AuthPage: React.FC<AuthPageProps> = ({ language }) => {
 
             {/* Error message */}
             {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
-                {error}
+              <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-sm text-red-400 flex items-start gap-3">
+                <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>{error}</span>
               </div>
             )}
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               {tab === 'register' && (
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider pl-1">
                     {ui.name}
                   </label>
                   <input
@@ -166,12 +159,12 @@ export const AuthPage: React.FC<AuthPageProps> = ({ language }) => {
                     onChange={(e) => setName(e.target.value)}
                     placeholder={isEs ? 'Tu nombre completo' : 'Your full name'}
                     required
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    className="w-full px-5 py-3.5 bg-slate-900/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
                   />
                 </div>
               )}
-              <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider pl-1">
                   {ui.email}
                 </label>
                 <input
@@ -180,11 +173,11 @@ export const AuthPage: React.FC<AuthPageProps> = ({ language }) => {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="tu@email.com"
                   required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  className="w-full px-5 py-3.5 bg-slate-900/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
                 />
               </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider pl-1">
                   {ui.password}
                 </label>
                 <input
@@ -194,29 +187,46 @@ export const AuthPage: React.FC<AuthPageProps> = ({ language }) => {
                   placeholder={isEs ? 'Mínimo 6 caracteres' : 'At least 6 characters'}
                   required
                   minLength={6}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  className="w-full px-5 py-3.5 bg-slate-900/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
                 />
               </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition shadow-sm disabled:opacity-60 disabled:cursor-not-allowed mt-2"
-              >
-                {loading ? ui.loading : tab === 'login' ? ui.submit_login : ui.submit_register}
-              </button>
+              
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="group relative w-full flex justify-center py-4 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-slate-900 shadow-lg shadow-blue-600/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
+                >
+                  <span className="absolute inset-0 w-full h-full -mt-1 rounded-lg opacity-30 bg-gradient-to-b from-transparent via-transparent to-black"></span>
+                  <span className="relative flex items-center gap-2">
+                    {loading ? (
+                      <>
+                        <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                        </svg>
+                        {ui.loading}
+                      </>
+                    ) : (
+                      tab === 'login' ? ui.submit_login : ui.submit_register
+                    )}
+                  </span>
+                </button>
+              </div>
             </form>
 
             {/* Switch tab link */}
-            <p className="mt-5 text-center text-sm text-gray-500">
+            <p className="mt-8 text-center text-sm text-slate-400">
               <button
                 onClick={() => { setTab(tab === 'login' ? 'register' : 'login'); setError(''); }}
-                className="text-blue-600 hover:text-blue-700 font-semibold"
+                className="text-blue-400 hover:text-blue-300 font-semibold transition-colors duration-300 hover:underline underline-offset-4"
               >
                 {tab === 'login' ? ui.switch_to_register : ui.switch_to_login}
               </button>
             </p>
           </div>
         </div>
+        
       </div>
     </div>
   );

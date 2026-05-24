@@ -363,25 +363,25 @@ function EditorView({
   const currentIdx = SECTIONS.indexOf(activeSection);
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50 overflow-hidden print:block print:h-auto print:overflow-visible print:bg-white">
+    <div className="h-screen flex flex-col bg-slate-50 overflow-hidden print:block print:h-auto print:overflow-visible print:bg-white">
       {/* ── Top navbar ── */}
-      <header className="flex-shrink-0 h-14 bg-white border-b border-gray-200 flex items-center px-3 sm:px-6 gap-2 sm:gap-4 z-10 shadow-sm print:hidden">
+      <header className="flex-shrink-0 h-16 bg-white/80 backdrop-blur-md border-b border-slate-200/60 flex items-center px-4 sm:px-6 gap-3 sm:gap-4 z-20 shadow-sm print:hidden">
         {/* Back button — text hidden on xs */}
         <button
           onClick={onBack}
-          className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 border border-gray-200 rounded-xl hover:bg-gray-50 transition flex-shrink-0"
+          className="group flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 flex-shrink-0 shadow-sm"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          <svg className="w-4 h-4 text-slate-400 group-hover:text-slate-600 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
           </svg>
           <span className="hidden sm:inline">{ui.myCVs}</span>
         </button>
 
         {/* Logo + editable title */}
-        <div className="flex items-center gap-2 min-w-0">
-          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-sm flex-shrink-0">
-            <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/20 flex-shrink-0">
+            <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
           {editingTitle ? (
@@ -391,15 +391,16 @@ function EditorView({
               onChange={(e) => setCvTitle(e.target.value)}
               onBlur={() => setEditingTitle(false)}
               onKeyDown={(e) => { if (e.key === 'Enter') setEditingTitle(false); }}
-              className="text-sm font-bold text-gray-900 border-b border-blue-500 outline-none bg-transparent w-24 sm:w-40"
+              className="text-base sm:text-lg font-bold text-slate-900 border-b-2 border-blue-500 bg-transparent outline-none w-32 sm:w-48 transition-all"
             />
           ) : (
             <button
               onClick={() => setEditingTitle(true)}
-              className="text-sm font-bold text-gray-900 hover:text-blue-600 transition truncate max-w-[80px] sm:max-w-[200px]"
+              className="text-base sm:text-lg font-bold text-slate-900 hover:text-blue-600 transition-colors truncate max-w-[120px] sm:max-w-[250px] flex items-center gap-2 group"
               title={cvTitle}
             >
               {cvTitle}
+              <svg className="w-3.5 h-3.5 text-slate-300 group-hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
             </button>
           )}
         </div>
@@ -654,30 +655,33 @@ function EditorView({
         <div
           className={`${
             mobilePanel === 'preview' ? 'flex flex-col' : 'hidden'
-          } md:flex md:flex-col flex-1 overflow-hidden print:block print:overflow-visible`}
+          } md:flex md:flex-col flex-1 overflow-hidden print:block print:overflow-visible relative`}
           style={{ backgroundColor: '#cbd5e1' }}
         >
+          {/* subtle inner shadow overlay */}
+          <div className="absolute inset-0 pointer-events-none shadow-[inset_10px_0_20px_rgba(0,0,0,0.03)] z-10 print:hidden" />
+
           {/* Preview bar */}
-          <div className="flex-shrink-0 flex items-center justify-between px-4 sm:px-5 py-2 bg-gray-700 border-b border-gray-600 print:hidden">
-            <div className="flex items-center gap-2">
-              <div className="flex gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-red-400" />
-                <div className="w-3 h-3 rounded-full bg-yellow-400" />
-                <div className="w-3 h-3 rounded-full bg-green-400" />
+          <div className="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-2.5 bg-slate-800 border-b border-slate-700 shadow-sm print:hidden z-20">
+            <div className="flex items-center gap-3">
+              <div className="flex gap-2">
+                <div className="w-3 h-3 rounded-full bg-rose-500 shadow-sm" />
+                <div className="w-3 h-3 rounded-full bg-amber-500 shadow-sm" />
+                <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-sm" />
               </div>
-              <span className="ml-2 text-xs text-gray-300 font-medium">
+              <span className="ml-3 text-xs text-slate-300 font-medium tracking-wide">
                 <span className="hidden sm:inline">{ui.preview} — </span>
-                {settings.template.charAt(0).toUpperCase() + settings.template.slice(1)}
+                <span className="text-white font-bold">{settings.template.charAt(0).toUpperCase() + settings.template.slice(1)}</span>
               </span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-              <span className="text-xs text-gray-400">{ui.live}</span>
+            <div className="flex items-center gap-2 bg-slate-900/50 px-3 py-1 rounded-full border border-slate-700/50">
+              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+              <span className="text-xs text-emerald-400 font-semibold tracking-wide uppercase">{ui.live}</span>
             </div>
           </div>
 
           {/* Scrollable CV panel — ref for ResizeObserver to compute display scale */}
-          <div ref={previewPanelRef} className="flex-1 overflow-auto print:overflow-visible">
+          <div ref={previewPanelRef} className="flex-1 overflow-auto print:overflow-visible z-0 relative scrollbar-none">
             <div
               className="print:block print:p-0"
               style={{
